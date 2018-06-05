@@ -5,6 +5,7 @@
 - Download bwa module at https://sourceforge.net/projects/bio-bwa/files/ 
 - Download samtools module at http://www.htslib.org/
 - Download Pysam module at https://github.com/pysam-developers/pysam (needed for mapDamage)
+- Execution of a CWL file is as follows: `cwltool` `input.cwl` `input.yml`
 
 ### Explanations ###
 The BWA pipeline encompasses the standard pipeline of bwa and samtools to generate a filtered and sorted BAM file. The CWL workflow is named `bwaworkflow2.cwl` with the input YAML file `bwainput2.yml`.
