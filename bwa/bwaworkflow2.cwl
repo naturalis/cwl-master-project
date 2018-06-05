@@ -53,14 +53,14 @@ outputs:
 
 steps:
   bwaindex:
-    run: /home/CHT/tomato/script2/bwaindex.cwl
+    run: bwaindex.cwl
     in:
       algorithm: algorithm
       sequence: sequence
     out:
     - outfiles
   bwamem:
-    run: /home/CHT/tomato/script2/bwamem.cwl
+    run: bwamem.cwl
     in:
       t: t
       reference: bwaindex/outfiles
@@ -70,7 +70,7 @@ steps:
     out:
     - outfile
   samtoolsview:
-    run: /home/CHT/tomato/script2/samtoolsview.cwl
+    run: samtoolsview.cwl
     in:
       F: F
       q: q
@@ -79,20 +79,20 @@ steps:
     out:
     - outfile
   samtoolssort:
-    run: /home/CHT/tomato/script2/samtoolssort.cwl
+    run: samtoolssort.cwl
     in:
       bam: samtoolsview/outfile
       o: o
     out:
     - outfile
   samtoolsindex:
-    run: /home/CHT/tomato/script2/samtoolsindex.cwl
+    run: samtoolsindex.cwl
     in:
       bam: samtoolssort/outfile
     out:
     - outfile
   mapdamage:
-    run: /home/CHT/tomato/script2/mapdamage.cwl
+    run: mapdamage.cwl
     in:
       sortedbam: samtoolssort/outfile
       directory: directory
