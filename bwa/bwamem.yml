@@ -1,0 +1,15 @@
+t: 4
+
+reference:
+  class: File
+  path: /home/CHT/tomato/script2/S_lycopersicum_chromosomes.3.00.fa
+
+fastq1:
+  class: File
+  path: /home/CHT/tomatodata/data/ERR410227_1.fastq.gz
+
+fastq2:
+  class: File
+  path: /home/CHT/tomatodata/data/ERR410227_2.fastq.gz
+
+output1: S_lycopersicum_chromosomes.3.00.fa-ERR410227.fastq.sam

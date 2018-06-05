@@ -1,0 +1,13 @@
+sortedbam:
+  class: File
+  path: /home/CHT/tomato/script2/S_lycopersicum_chromosomes.3.00.fa-ERR410227.sam.sorted.bam
+
+directory: S_lycopersicum_chromosomes.3.00.fa-ERR410227.sam.mapDamage
+
+reference:
+  class: File
+  path: /home/CHT/tomato/script2/S_lycopersicum_chromosomes.3.00.fa
+
+l: 101
+
+n: 10000

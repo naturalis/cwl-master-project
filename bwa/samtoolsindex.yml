@@ -1,0 +1,3 @@
+bam:
+  class: File
+  path: /home/CHT/tomato/script2/S_lycopersicum_chromosomes.3.00.fa-ERR418039.fastq.sam.sorted.bam

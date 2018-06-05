@@ -1,0 +1,31 @@
+algorithm: bwtsw
+
+sequence:
+  class: File
+  path: /home/CHT/tomatodata/reference/S_lycopersicum_chromosomes.3.00.fa
+
+t: 4
+
+fastq1:
+  class: File
+  path: /home/CHT/tomatodata/data/ERR418039_1.fastq.gz
+
+fastq2:
+  class: File
+  path: /home/CHT/tomatodata/data/ERR418039_2.fastq.gz
+
+output1: S_lycopersicum_chromosomes.3.00.fa-ERR418039.fastq.sam
+
+output2: S_lycopersicum_chromosomes.3.00.fa-ERR418039.fastq.sam.filtered.bam
+
+F: 4
+
+q: 50
+
+o: S_lycopersicum_chromosomes.3.00.fa-ERR418039.fastq.sam.sorted
+
+directory: S_lycopersicum_chromosomes.3.00.fa-ERR418039.sam.mapDamage
+
+l: 101
+
+n: 10000

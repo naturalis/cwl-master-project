@@ -1,0 +1,9 @@
+F: 4
+
+q: 50
+
+sam:
+  class: File
+  path: /home/CHT/tomato/script2/S_lycopersicum_chromosomes.3.00.fa-ERR410227.fastq.sam
+
+output2: S_lycopersicum_chromosomes.3.00.fa-ERR410227.fastq.sam.filtered.bam
