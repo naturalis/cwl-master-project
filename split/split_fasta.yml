@@ -1,0 +1,3 @@
+shell_file:
+  class: File
+  path: split_fasta.sh
