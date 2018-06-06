@@ -64,17 +64,11 @@ inputs:
 outputs:
   outfile1:
     type: File
-    outputSource: gff3/outfile
+    outputSource: gffcds/outfile
   outfile2:
     type: File
-    outputSource: gffcds/outfile
-  outfile3:
-    type: File
-    outputSource: gff2bed/outfile
-  outfile4:
-    type: File
     outputSource: sort/outfile
-  outfile5:
+  outfile3:
     type: File
     outputSource: bedtoolsmerge/outfile
 
