@@ -10,7 +10,7 @@ The scripts use packages you need to download, if you haven't already.
 
 ### Instructions ###
 To execute a CWL script or workflow, type the following in your command line `cwltool file.cwl file.yml`. 
-The CWL workflow is `vcf_split.cwl` and `vcf_split.yml` to split your VCF file based on a specific chromosome. The others are tool wrappers for the splitting of your GTF and FASTA file based on a specific chromosome.
+The CWL workflow is `vcf_split.cwl` and `vcf_split.yml` to split your VCF file based on a specific chromosome, based on the tool wrappers `tabix1.cwl` and `tabix2.cwl`. The others are tool wrappers for the splitting of your GTF and FASTA file based on a specific chromosome.
 - `tabix1.cwl`
     - Indexes compressed VCF-file. 
     - Outputs `"*.tbi"` in working directory.
