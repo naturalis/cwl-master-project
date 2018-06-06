@@ -1,0 +1,11 @@
+perl_file:
+  class: File
+  path: /home/CHT/snpgenie/dnds/gff2gtf.pl
+
+gff_file:
+  class: File
+  path: /home/CHT/Downloads/ITAG2.4_gene_models.gff3
+
+input1: '{print $5-$4+1, $10}'
+
+input2: '{if($1%3!=0){split($2,at,"\.");print at[1]}}'
