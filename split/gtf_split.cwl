@@ -18,4 +18,4 @@ outputs:
   outfile:
     type: stdout
 
-stdout: RF_001_SZAXPI008746-45_$(inputs.ch).gtf
+stdout: new_$(inputs.ch).gtf
