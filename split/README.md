@@ -18,7 +18,7 @@ The CWL workflow is `vcf_split.cwl` and `vcf_split.yml` to split your VCF file b
     - Generates specific chromosome VCF-file based on `chr_string` input from YAML-file. 
     - Outputs `"*.vcf"` in working directory.
 - `gtfchr.cwl`
-    - Generates specific chromosome GTF-file (GTF-file from `grep2.cwl`) based on `ch` input from YAML-file. 
+    - Generates specific chromosome GTF-file (GTF-file from `grep2.cwl` of gff2gtf) based on `ch` input from YAML-file. 
     - Outputs `"*.gtf"` in working directory.
 - `split_fasta.cwl`
     - Splits FASTA sequences from reference FASTA based on input path in `split_fasta.sh`. 
