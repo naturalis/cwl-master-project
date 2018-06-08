@@ -1,5 +1,5 @@
 ### Instructions ###
-This tool wrapper targets the within-pool analysis of SNPgenie, which uses 1 pooled sample. You can decide to do a chromosome-wide analysis or a specific gene analysis based on your input files. As always, when using the CWL scripts, make sure to `modify` path locations of file names in YAML files. 
+This tool wrapper targets the within-pool analysis of SNPgenie, which uses 1 pooled sample. You can decide to do a chromosome-wide analysis or a specific gene analysis based on your input files. When using the CWL scripts, make sure to `modify` input file parameters in YAML files. 
 
 ### Explanations ###
 - `snpgenie.cwl` 
