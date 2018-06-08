@@ -1,0 +1,29 @@
+locusid1: "Solyc01g006550"
+locusid2: "Solyc01g009690"
+locusid3: "Solyc02g062560"
+locusid4: "Solyc02g085500"
+locusid5: "Solyc02g090730"
+locusid6: "Solyc03g031860"
+locusid7: "Solyc03g082780"
+locusid8: "Solyc05g012020"
+locusid9: "Solyc05g013300"
+locusid10: "Solyc06g008300"
+locusid11: "Solyc06g008450"
+locusid12: "Solyc06g051550"
+locusid13: "Solyc07g066250"
+locusid14: "Solyc09g005080"
+locusid15: "Solyc09g005090"
+locusid16: "Solyc09g010080"
+locusid17: "Solyc09g010090"
+locusid18: "Solyc09g018220"
+locusid19: "Solyc09g098130"
+locusid20: "Solyc10g008160"
+locusid21: "Solyc10g083290"
+locusid22: "Solyc10g083300"
+locusid23: "Solyc11g071430"
+
+gtf_file:
+  class: File
+  path: /home/CHT/snpgenie/split/new_SL2.50ch10.gtf
+
+file_name: new_SL2.50ch10
