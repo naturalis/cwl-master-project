@@ -12,6 +12,10 @@ inputs:
     inputBinding:
       prefix: -h
       position: 2
+  file_prefix:
+    type: string
+    inputBinding:
+      position: 3
   chr_string:
     type: string
     inputBinding:
@@ -21,4 +25,4 @@ outputs:
   outfile:
     type: stdout
 
-stdout: RF_001_SZAXPI008746-45_$(inputs.chr_string).vcf
+stdout: $(inputs.file_prefix)_$(inputs.chr_string).vcf
