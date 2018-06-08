@@ -17,8 +17,8 @@ The CWL workflow is `vcf_split.cwl` and `vcf_split.yml` to split your VCF file b
     - Outputs `"*.tbi"` in working directory.
 - `tabix2.cwl`
     - Generates specific chromosome VCF file based on `chr_string` input from YAML-file. 
+    - Modify `file_prefix` in `vcf_split.yml` YAML file to name your file prefix (sample name?) of output file.
     - Modify `chr_string` in `vcf_split.yml` YAML file to name your output file.
-        - Do take note that you have to modify the static name part of `stdout` in `tabix2.cwl` to complement your output file.
     - Outputs `"*.vcf"` in working directory.
 - `gtf_split.cwl`
     - Generates specific chromosome GTF file (GTF file from `grep2.cwl` of gff2gtf) based on `ch` input from YAML file. 
