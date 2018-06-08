@@ -8,6 +8,8 @@ inputs:
     type: string
   vcfgz:
     type: File
+  file_prefix:
+    type: string
   chr_string:
     type: string
 
@@ -28,6 +30,7 @@ steps:
     run: tabix2.cwl
     in:
       vcfgz_file: tabix1/outfile
+      file_prefix: file_prefix
       chr_string: chr_string
     out:
     - outfile
