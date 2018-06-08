@@ -1,5 +1,0 @@
-algorithm: bwtsw
-
-sequence:
-  class: File
-  path: /home/CHT/tomatodata/reference/S_lycopersicum_chromosomes.3.00.fa
