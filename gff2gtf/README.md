@@ -23,7 +23,9 @@ The CWL workflow is `snpworkflow.cwl` and `snpworkflow.yml`. The order of the CW
     - Retrieve all codon lines that are not multiple by 3 and specifies associated gene IDs.
 - `sort.cwl`
     - Sorts gene IDs so there are no duplicates. 
-    - Outputs `genesID.txt` in workflow.
+    - Modify `gene_list` in YAML file to specify output txt file.
+    - Outputs `*.txt` in workflow.
 - `grep2.cwl`
     - Excludes all gene IDs that have a matching line in `genesID.txt`. 
-    - Outputs `new.gtf` in workflow.
+    - Modify `filtere_gene_list` in YAML file to specify output GTF file.
+    - Outputs `*.gtf` in workflow.
