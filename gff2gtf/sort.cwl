@@ -10,9 +10,11 @@ inputs:
     inputBinding:
       prefix: -u
       position: 2
+  gene_list:
+    type: string
 
 outputs:
   outfile:
     type: stdout
 
-stdout: genesID.txt
+stdout: $(inputs.gene_list).txt
