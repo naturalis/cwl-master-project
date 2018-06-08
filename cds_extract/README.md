@@ -13,7 +13,9 @@ To execute a CWL script or workflow, type the following in your command line `cw
 The CWL workflow is `cds_extract.cwl` and `cds_extract.yml`. 
 The order of the CWL scripts execution is:
  - `gff.cwl`
-   - Retrieves GFF information of unique IDs (up to 23 IDs) specified in YAML file from GFF file
+   - Retrieves GFF information of unique IDs specified in YAML file from GFF file
+   - Modify `locusID` in YAML file to specify unique IDs, needs at least 1 parameter up to 23 
+   - Modify `gff` in YAML file to add your desired GFF file
  - `gffcds.cwl`
    - Filter above-mentioned GFF file on CDS of IDs.
    - Outputs `cdsfiltered.gff` in working directory.
