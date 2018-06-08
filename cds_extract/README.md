@@ -1,6 +1,6 @@
 
 This directory encompasses the extraction of the CDS en intervals from the target sequences.
-As always, when using the CWL scripts or workflow, make sure to `modify` path locations of file names in YAML files.
+When using the CWL scripts, make sure to `modify` input file parameters in YAML files.
 
 ### To-do beforehand ###
 
