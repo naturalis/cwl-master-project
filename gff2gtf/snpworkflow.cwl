@@ -12,6 +12,10 @@ inputs:
     type: string
   input2:
     type: string
+  gene_list:
+    type: string
+  filtered_gene_list:
+    type: string
 
 outputs:
   outfile1:
@@ -56,6 +60,7 @@ steps:
     run: sort.cwl
     in:
       sort: awk2/outfile
+      gene_list: gene_list
     out:
     - outfile
   grep2:
@@ -63,5 +68,6 @@ steps:
     in:
       genesid: sort/outfile
       gtf: gff2gtf/outfile
+      filtered_gene_list: filtered_gene_list
     out:
     - outfile
