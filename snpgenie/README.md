@@ -1,0 +1,7 @@
+- `snpgenie.cwl` 
+    - Executes `snpgenie.pl` for dnds ratio on pooled data.
+    - It only accepts 1 input sequence, hence the need to split everything.
+    - It uses input files from `tabix2.cwl` (your VCF-file), `gtfchr.cwl` (your GTF-file) and `split_fasta.cwl` (your FASTA file) meaning you have to specify the paths to these files in the YAML-file.
+        - Do note that the syntax commands are without space between "=" and input! (e.g. --vcfformat=3, --fastafile=/path/to/*.fasta)
+    - VCF-format is most likely 3 (see https://github.com/chasewnelson/snpgenie#vcf)
+    - Outputs `SNPGenie_Results` directory with results in .txt files.
