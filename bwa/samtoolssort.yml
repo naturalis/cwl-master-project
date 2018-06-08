@@ -1,5 +1,0 @@
-bam:
-  class: File
-  path: /home/CHT/tomato/workflow2/S_lycopersicum_chromosomes.3.00.fa-ERR418039.fastq.sam.filtered.bam
-
-o: S_lycopersicum_chromosomes.3.00.fa-ERR418039.fastq.sam.sorted.bam
