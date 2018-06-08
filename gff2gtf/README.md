@@ -27,5 +27,5 @@ The CWL workflow is `snpworkflow.cwl` and `snpworkflow.yml`. The order of the CW
     - Outputs `*.txt` in workflow.
 - `grep2.cwl`
     - Excludes all gene IDs that have a matching line in `*.txt` (from `sort.cwl`). 
-    - Modify `filtere_gene_list` in YAML file to specify output GTF file name.
+    - Modify `filtered_gene_list` in YAML file to specify output GTF file name.
     - Outputs `*.gtf` in workflow.
