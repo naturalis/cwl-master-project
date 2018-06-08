@@ -1,8 +1,7 @@
 ### Explanation ###
 
 This directory encompasses the conversion of your GFF file to GTF format and filters all codon sites that are not multiple by 3.
-As always, when using the CWL scripts, make sure to `modify` path locations of file names in YAML files. Or, if you have the scripts in your working directory, specify only the script name with extension.
-
+When using the CWL scripts, make sure to `modify` parameters of of input files in YAML files when needed.
 ### To-do beforehand ###
 
 The scripts use packages you need to download, if you haven't already.
