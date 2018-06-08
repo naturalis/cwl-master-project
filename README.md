@@ -4,6 +4,6 @@ Source code in Common Workflow Language for sharing pipelines between Rijk Zwaan
 - bwa directory is the standard pipeline for creating BAM files
 - gff2gtf directory is a workflow for modifying GFF to GTF format for SNPgenie
 - split directory contains a workflow to split FASTA, GTF and VCF files on chromosomes/specific gene IDs for SNPgenie
-- snpgenie directory is the workflow for SNPgenie analysis to estimate evolutionairy parameters
+- snpgenie directory has a tool wrapper for SNPgenie analysis to estimate evolutionairy parameters
 - revcomp directory includes a Perl script that converts FASTA, GTF and VCF files to reverse complement (for '-' strand)
 - cds_extract directory is a workflow for generating a BED file on specific gene IDs
