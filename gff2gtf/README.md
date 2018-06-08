@@ -13,6 +13,7 @@ To execute a CWL script or workflow, type the following in your command line `cw
 The CWL workflow is `snpworkflow.cwl` and `snpworkflow.yml`. The order of the CWL scripts execution is:
 - `gff2gtf.cwl`
     - This converts your existing reference GFF-file to GTF-file (needed for SNPgenie) with a Perl script (`gff2gtf.pl, source: https://github.com/chasewnelson/CHASeq`). 
+    - Modify `gff_file` in YAML file to specify your desired GFF file.
     - Outputs `'*_converted.gtf'` in workflow.
 - `grep1.cwl`
     - Retrieves all entries with CDS in lines.
