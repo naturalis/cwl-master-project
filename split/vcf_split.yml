@@ -4,4 +4,6 @@ vcfgz:
   class: File
   path: /home/CHT/tomatovcf/ftp.solgenomics.net/genomes/tomato_150/150_VCFs_2.50/RF_001_SZAXPI008746-45.vcf.gz.snpeff.vcf.gz
 
+file_prefix: RF_001_SZAXPI008746-45
+
 chr_string: SL2.50ch02
