@@ -14,9 +14,11 @@ inputs:
     type: File
     inputBinding:
       position: 3
+  filtered_gene_list:
+    type: string
 
 outputs:
   outfile:
     type: stdout
 
-stdout: new.gtf
+stdout: $(inputs.filtered_gene_list).gtf
