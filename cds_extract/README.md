@@ -7,6 +7,7 @@ When using the CWL scripts, make sure to `modify` input file parameters in YAML 
 The scripts use packages you need to download, if you haven't already.
 - `cwltool` and `cwl-runner` https://github.com/common-workflow-language/cwltool
 - `bedtools` http://bedtools.readthedocs.io/en/latest/content/installation.html
+- `BEDOPS` http://bedops.readthedocs.io/en/latest/index.html
 
 ### Instructions ###
 To execute a CWL script or workflow, type the following in your command line `cwltool file.cwl file.yml`. 
@@ -21,6 +22,7 @@ The order of the CWL scripts execution is:
    - Outputs `cdsfiltered.gff` in working directory.
  - `gff2bed.cwl`
    - Converts filtered GFF file to a BED file with the use of a shell script.
+   - Used `gff2bed` command from BEDOPS.
  - `sort.cwl`
    - Sorts the BED file based on chromosome, start and end positions
    - Outputs `allsorted.bed` in working directory.
