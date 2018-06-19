@@ -25,7 +25,6 @@ The order of execution of the pipeline is as follows:
 - `samtoolssort.cwl`
   - Sort your filtered BAM file
   - Modify `o` in YAML file to specify file name of sorted BAM output
-  - Do not add `.bam` extension to the file name since it automatically adds the extension
 - `samtoolsindex.cwl`
   - Indexes your sorted BAM file
 - `mapdamage.cwl`
