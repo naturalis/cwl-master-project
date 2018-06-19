@@ -22,7 +22,7 @@ F: 4
 
 q: 50
 
-o: S_lycopersicum_chromosomes.3.00.fa-ERR418039.fastq.sam.sorted
+o: S_lycopersicum_chromosomes.3.00.fa-ERR418039.fastq.sam.sorted.bam
 
 directory: S_lycopersicum_chromosomes.3.00.fa-ERR418039.sam.mapDamage
 
