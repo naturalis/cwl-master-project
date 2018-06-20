@@ -10,6 +10,11 @@ inputs:
     inputBinding:
       prefix: -uf
       position: 2
+  l:
+    type: File
+    inputBinding:
+      prefix: -l
+      position: 2
   bam1:
     type: File
     inputBinding:
