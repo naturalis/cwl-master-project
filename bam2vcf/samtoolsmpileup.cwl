@@ -11,7 +11,7 @@ inputs:
       prefix: -uf
       position: 2
   l:
-    type: File
+    type: File?
     inputBinding:
       prefix: -l
       position: 2
