@@ -1,0 +1,13 @@
+uf:
+  class: File
+  path: /home/CHT/tomatodata/reference/S_lycopersicum_chromosomes.3.00.fa
+
+bam1:
+  class: File
+  path: /home/CHT/tomato/workflow2/S_lycopersicum_chromosomes.3.00.fa-120613_I176_FCC0VM8ACXX_L8_SZAXPI009284-57.fastq.sam.sorted.bam
+
+mv: -mv
+
+Oz: -Oz
+
+o: 120613_I176_FCC0VM8ACXX_L8_SZAXPI009284-57.vcf.gz
