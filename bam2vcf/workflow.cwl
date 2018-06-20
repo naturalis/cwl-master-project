@@ -6,6 +6,8 @@ class: Workflow
 inputs:
   uf:
     type: File
+  l: 
+    type: File?
   bam1:
     type: File
   mv:
@@ -25,6 +27,7 @@ steps:
     run: samtoolsmpileup.cwl
     in:
       uf: uf
+      l: l
       bam1: bam1
     out:
     - outfile
