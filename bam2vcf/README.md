@@ -14,3 +14,7 @@ The CWL workflow is `workflow.cwl` and `workflow.yml`.
  - `bcftools.cwl`
    - Creates VCF file from BCF file 
    - Modify `o` in YAML file to name your compressed VCF file
+
+### Notes ###
+- Be aware that SNPgenie needs data from pooled samples. This can be easily achieved by merging all VCF files into 1 single VCF file.
+- Before you can merge them, you'll probably need to index them with tabix and then merge with vcf-merge or bcftools merge commands.
