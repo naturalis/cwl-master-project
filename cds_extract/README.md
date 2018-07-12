@@ -22,6 +22,7 @@ The order of the CWL scripts execution is:
    - Outputs `cdsfiltered.gff` in working directory.
  - `gff2bed.cwl`
    - Converts filtered GFF file to a BED file with the use of a shell script.
+   - Modify path for `cdsfiltred.gff` in shell script.
    - Used `gff2bed` command from BEDOPS.
  - `sort.cwl`
    - Sorts the BED file based on chromosome, start and end positions
