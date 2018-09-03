@@ -7,7 +7,7 @@ When using the CWL scripts, make sure to `modify` parameters of input files in Y
 
 The scripts use packages you need to download, if you haven't already.
 - `cwltool` and `cwl-runner` https://github.com/common-workflow-language/cwltool
-- `gffread` from `cufflinks` http://cole-trapnell-lab.github.io/cufflinks/install/ (this link will provide a pre-compired binary release, instead of building Cufflinks from scratch)
+- `gffread` from `cufflinks` http://cole-trapnell-lab.github.io/cufflinks/install/ (this link will provide a pre-compiled binary release, instead of building Cufflinks from scratch)
 
 ### Instructions ###
 To execute a CWL script or workflow, type the following in your command line `cwltool file.cwl file.yml`. 
