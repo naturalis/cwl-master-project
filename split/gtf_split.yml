@@ -1,0 +1,5 @@
+ch: SL2.50ch00
+
+gtfchr_file:
+  class: File
+  path: /home/CHT/snpgenie/original2/only_CDS.gtf
