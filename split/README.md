@@ -7,6 +7,7 @@ This directory encompasses the preparation and separation of files, based on chr
 The scripts use packages you need to download, if you haven't already.
 - `cwltool` and `cwl-runner` https://github.com/common-workflow-language/cwltool#install
 - `tabix` (part of HTSlib) http://www.htslib.org/download/
+- `vcftools` https://vcftools.github.io/downloads.html
 
 ### Instructions ###
 To execute a CWL script or workflow, type the following in your command line `cwltool file.cwl file.yml`. 
@@ -20,6 +21,14 @@ The CWL workflow is `vcf_split.cwl` and `vcf_split.yml` to split your VCF file b
     - Modify `file_prefix` in `vcf_split.yml` YAML file to name your file prefix (sample name?) of output file.
     - Modify `chr_string` in `vcf_split.yml` YAML file to name your output file.
     - Outputs `"*.vcf"` in working directory.
+- `vcftools_split.cwl`
+    - Alternative for the tabix tool wrappers to split VCF from a merged VCF file.
+    - Modify `gzvcf` in `vcftools_split.yml` to specify which GZVCF.
+    - Modify `chr` in `vcftools_split.yml` to specify which chromosome.
+    - Modify `out` in `vcftools_split.yml` to specify output file name (will be named *.recode.vcf).
+    - Modify `indv` in `vcftools_split.yml` to specify which sample.
+    - Modify the other parameters on integers as you wish.
+    - Outputs `*.recode.vcf` and a `*.log` (log file) in working directory.
 - `gtf_split.cwl`
     - Generates specific chromosome GTF file (GTF file from `grep2.cwl` of gff2gtf) based on `ch` input from YAML file. 
     - Modify `ch` in `gtf_split_workflow.yml` YAML file to specify your desired chromosome in GTF file
