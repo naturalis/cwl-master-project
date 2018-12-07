@@ -1,0 +1,19 @@
+gzvcf:
+  class: File
+  path: /mnt/WORKSPACE/cht_workspace/CHT/snpgenie/Tomato_RZ/VCF/Tomato_sl3_00_snpeff_interpolated.vcf.gz
+
+chr: SL3_0ch10
+
+recodeinfo: recode-INFO-all
+
+maxalleles: 2
+
+minGQ: 10
+
+nonrefac: 1
+
+out: filtered_test_102778_003_ch10
+
+recode: recode
+
+indv: 102778-003_TCCGCGAA-AGGCGAAG
