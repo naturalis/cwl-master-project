@@ -10,7 +10,7 @@ inputs:
     inputBinding:
       position: 2
   vcfformat:
-    type: string
+    type: string?
     inputBinding:
       position: 3
   snpreport:
