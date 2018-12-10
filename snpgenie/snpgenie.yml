@@ -2,10 +2,10 @@ perl:
   class: File
   path: /home/CHT/snpgenie/pool/snpgenie.pl
 
-vcfformat: 3
+vcfformat: --vcfformat=3
 
-snpreport: /home/CHT/snpgenie/revcomp/RF_001_ch06/RF_001_SZAXPI008746-45_SL2.50ch06_revcom.txt
+snpreport: --snpreport=/home/CHT/snpgenie/revcomp/RF_001_ch06/RF_001_SZAXPI008746-45_SL2.50ch06_revcom.txt
 
-fastafile: /home/CHT/snpgenie/revcomp/RF_001_ch06/SL2.50ch06_revcom.fa
+fastafile: --fastafile=/home/CHT/snpgenie/revcomp/RF_001_ch06/SL2.50ch06_revcom.fa
 
-gtffile: /home/CHT/snpgenie/revcomp/RF_001_ch06/new_SL2.50ch06_filtered_revcom.gtf
+gtffile: --gtffile=/home/CHT/snpgenie/revcomp/RF_001_ch06/new_SL2.50ch06_filtered_revcom.gtf
