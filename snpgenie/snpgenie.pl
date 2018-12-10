@@ -64,12 +64,7 @@ my $snpreport;
 my $vcfformat; ##SAMVCF
 my $fastafile;
 my $gtffile;
-my $sepfiles;
 my $slidingwindow;
-my $ratiomode;
-my $sitebasedmode; # not supported or recommended; site (not codon) contexts
-my $complementmode;
-#my $prop_diff_threshold = 0.01;
 
 # Flag variables
 my $clc_mode = 0;
@@ -84,7 +79,7 @@ my $fasta_arr_size;
 my $cds_file;
 my $multi_fasta_mode;
 
-my $param_file_contents = "SNPGenie version 1.2 parameter log.\n\n";
+my $param_file_contents = "SNPGenie parameter log.\n\n";
 
 # Get user input, if given. If a Boolean argument is passed, its value is 1; else undef
 GetOptions(	"minfreq:f" => \$minfreq, # optional floating point parameter
@@ -93,12 +88,7 @@ GetOptions(	"minfreq:f" => \$minfreq, # optional floating point parameter
 			"fastafile:s" => \$fastafile, # optional string parameter
 			"multi_fasta_mode" => \$multi_fasta_mode, # optional Boolean parameter
 			"gtffile:s" => \$gtffile, # optional string parameter
-			"sepfiles" => \$sepfiles, # optional Boolean; set to false if not given
-			"slidingwindow:i" => \$slidingwindow, # optional integer parameter
-			"ratiomode" => \$ratiomode, # optional Boolean; set to false if not given
-			"sitebasedmode" => \$sitebasedmode) # optional Boolean; set to false if not given
-#			"complementmode" => \$complementmode) # optional Boolean; set to false if not given
-#			"prop_diff_threshold:f" => \$prop_diff_threshold)
+			"slidingwindow:i" => \$slidingwindow)
 			
 			or die "\n## WARNING: Error in command line arguments. SNPGenie terminated.\n\n"; 
 
@@ -124,37 +114,10 @@ if (-d "SNPGenie_Results") { # Can also use "./SNPGenie_Results"; use "-e" to ch
 		$param_file_contents .= "MINIMUM ALLELE FREQUENCY: $minfreq\n";
 	}
 	
-	if(! $sepfiles) {
-		$sepfiles = 0; # default behavior: no separate codon files for each SNP Report
-		$param_file_contents .= "SEPARATE FILES OUTPUT: No\n";
-	} else {
-		$sepfiles = 1;
-		$param_file_contents .= "SEPARATE FILES OUTPUT: Yes\n";
-	}
-	
-	if($slidingwindow == 0) { # Called as a flag, but given no value
-		$slidingwindow = 9; # default behavior: nonamer peptide
-		$param_file_contents .= "SLIDING WINDOW LENGTH: Default used; 9 codons\n";
-	} elsif($slidingwindow > 0) {
+	if($slidingwindow > 0) {
 		$param_file_contents .= "SLIDING WINDOW LENGTH: $slidingwindow\n";
 	} else {
 		$param_file_contents .= "SLIDING WINDOW LENGTH: None\n";
-	}
-	
-	if(! $ratiomode) {
-		$ratiomode = 0; # default behavior: no separate codon files for each SNP Report
-		$param_file_contents .= "RATIO MODE: Default used; No\n";
-	} else {
-		$ratiomode = 1;
-		$param_file_contents .= "RATIO MODE: Yes\n";
-	}
-	
-	if(! $sitebasedmode) {
-		$sitebasedmode = 0; # default behavior: no separate codon files for each SNP Report
-		$param_file_contents .= "SITE-BASED MODE: Default used; No\n";
-	} else {
-		$sitebasedmode = 1;
-		$param_file_contents .= "SITE-BASED MODE: Yes\n";
 	}
 	
 	if(! $multi_fasta_mode) {
@@ -257,19 +220,12 @@ if (-d "SNPGenie_Results") { # Can also use "./SNPGenie_Results"; use "-e" to ch
 	### NUCLEOTIDE DIVERSITY FILE
 	open(OUTFILE_NT_DIV,">>codon\_results\.txt");
 	my $ntd_headers_to_print = "file\tproduct\tsite\tcodon\tnum_overlap_ORF_nts\t".
-			"N_diffs\tS_diffs\t";
-	if($sitebasedmode == 1) {
-		$ntd_headers_to_print .= "N_diffs_site_based\tS_diffs_site_based\t";
-	}
+		#"mean_coverage\t".
+		"N_diffs\tS_diffs\t";
 	$ntd_headers_to_print .= "N_sites\tS_sites\t";
-	if($sitebasedmode == 1) {
-		$ntd_headers_to_print .= "N_sites_site_based\tS_sites_site_based\t";
-	}
+
 	$ntd_headers_to_print .= "N_sites_ref\tS_sites_ref\t";
 	#$ntd_headers_to_print .= "piN\tpiS\t";
-	if($ratiomode == 1) {
-		$ntd_headers_to_print .= "piN/piS\t";
-	}
 	$ntd_headers_to_print .= "N_diffs_vs_ref\tS_diffs_vs_ref\t".
 		"gdiv\tN_gdiv\tS_gdiv\n";
 	#$ntd_headers_to_print .= "mean_dN_vs_ref\tmean_dS_vs_ref\n"; # \tAverage_cov
@@ -347,7 +303,7 @@ print "\n\n#####################################################################
 
 # Print LICENSE
 print "\n  ###############################  LICENSE:  #################################\n";
-print "  ##              SNPGenie Copyright (C) 2015 Chase W. Nelson               ##\n".
+print "  ##            SNPGenie Copyright (C) 2015-18 Chase W. Nelson              ##\n".
 	"  ##            This program comes with ABSOLUTELY NO WARRANTY;             ##\n".
 	"  ##     This is free software, and you are welcome to redistribute it      ##\n".
 	"  ##               under certain conditions; see LICENSE.txt.               ##";
@@ -374,7 +330,7 @@ if($minfreq > 0) {
 # "-" strand records in the GTF file.
 
 # Complement mode?
-$complementmode = &determine_complement_mode($cds_file);
+my $complementmode = &determine_complement_mode($cds_file);
 
 # Announce and initialize REVERSE COMPLEMENT MODE
 my %hh_compl_position_info; # REGARDLESS OF SNP REPORT. saved with respect to the + strand
@@ -403,28 +359,28 @@ if($complementmode) {
 		my $rev_compl_start; # Where the gene itself actually STOPS
 		my $rev_compl_stop; # Where the gene itself actually STARTS
 
-		if($_ =~ /CDS\t(\d+)\t(\d+)\t\.\t\-\t\d+\t\s*gene_id\s*\"gene\:([\w\s\.\-\:']+)\"/) { # Line is - strand
+		if($_ =~ /CDS\t(\d+)\t(\d+)\t[\.\d]+\t\-\t\d+\t\s*gene_id\s*\"gene\:([\w\s\.\-\:']+)\"/) { # Line is - strand
 			$rev_compl_start = $1; # Where the gene itself actually STOPS
 			$rev_compl_stop = $2; # Where the gene itself actually STARTS
 			$this_product = $3;
-		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t\.\t\-\t\d+\t\s*gene_id\s*\"([\w\s\.\-\:']+ [\w\s\.\-\:']+)\"/) {
+		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t[\.\d]+\t\-\t\d+\t\s*gene_id\s*\"([\w\s\.\-\:']+ [\w\s\.\-\:']+)\"/) {
 			$rev_compl_start = $1; # Where the gene itself actually STOPS
 			$rev_compl_stop = $2; # Where the gene itself actually STARTS
 			$this_product = $3;
-		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t\.\t\-\t\d+\t\s*gene_id\s*\"([\w\s\.\-\:']+)\"/) {
+		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t[\.\d]+\t\-\t\d+\t\s*gene_id\s*\"([\w\s\.\-\:']+)\"/) {
 			$rev_compl_start = $1; # Where the gene itself actually STOPS
 			$rev_compl_stop = $2; # Where the gene itself actually STARTS
 			$this_product = $3;
 		# NOW, IN CASE transcript_id comes first
-		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t\.\t\-\t\d+\ttranscript_id \"[\w\s\.\-\:']+\"\s*;\s*gene_id\s*\"gene\:([\w\s\.\-\:']+)\"/) {
+		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t[\.\d]+\t\-\t\d+\ttranscript_id \"[\w\s\.\-\:']+\"\s*;\s*gene_id\s*\"gene\:([\w\s\.\-\:']+)\"/) {
 			$rev_compl_start = $1; # Where the gene itself actually STOPS
 			$rev_compl_stop = $2; # Where the gene itself actually STARTS
 			$this_product = $3;
-		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t\.\t\-\t\d+\ttranscript_id \"[\w\s\.\-\:']+\"\s*;\s*gene_id\s*\"([\w\s\.\-\:']+ [\w\s\.\-\:']+)\"/) {
+		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t[\.\d]+\t\-\t\d+\ttranscript_id \"[\w\s\.\-\:']+\"\s*;\s*gene_id\s*\"([\w\s\.\-\:']+ [\w\s\.\-\:']+)\"/) {
 			$rev_compl_start = $1; # Where the gene itself actually STOPS
 			$rev_compl_stop = $2; # Where the gene itself actually STARTS
 			$this_product = $3;
-		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t\.\t\-\t\d+\ttranscript_id \"[\w\s\.\-\:']+\"\s*;\s*gene_id\s*\"([\w\s\.\-\:']+)\"/) {
+		} elsif($_ =~ /CDS\t(\d+)\t(\d+)\t[\.\d]+\t\-\t\d+\ttranscript_id \"[\w\s\.\-\:']+\"\s*;\s*gene_id\s*\"([\w\s\.\-\:']+)\"/) {
 			$rev_compl_start = $1; # Where the gene itself actually STOPS
 			$rev_compl_stop = $2; # Where the gene itself actually STARTS
 			$this_product = $3;
@@ -572,7 +528,7 @@ if($vcfformat == 4) { # generate as many SNP reports as there are sample columns
 	
 	# Find out if there is more than one sample by counting columns after FORMAT
 	#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample1
-	my $header_line;
+	my $header_line = '';
 	open (ORIGINAL_SNP_REPORT, $snp_report_file_names_arr[0]); # always just one
 	while (<ORIGINAL_SNP_REPORT>) {	
 		chomp;
@@ -587,6 +543,11 @@ if($vcfformat == 4) { # generate as many SNP reports as there are sample columns
 		}
 	}
 	close ORIGINAL_SNP_REPORT;
+	
+	if($header_line eq '') {
+		die "\n\n## WARNING:\n## The SNP Report $snp_report_file_names_arr[0] has no header." . 
+			"\n## TERMINATED.\n\n";
+	}
 	
 	$header_line =~ s/^#//;
 	#print "\nHEADER LINE IS: $header_line\n\n";
@@ -620,7 +581,7 @@ if($vcfformat == 4) { # generate as many SNP reports as there are sample columns
 		
 		push(@temp_vcf4_file_names, $new_temp_vcf4_file_name);
 		
-		print "\nCreating $new_temp_vcf4_file_name\...\n\n";
+		print "Creating $new_temp_vcf4_file_name\...\n";
 		
 		if(-f "$new_temp_vcf4_file_name") {
 			warn "\n\n### WARNING: $new_temp_vcf4_file_name already present. Replacing...\n\n";
@@ -657,15 +618,15 @@ if($vcfformat == 4) { # generate as many SNP reports as there are sample columns
 				my @this_line_arr = split(/\t/,$_,-1);
 				
 				my $this_new_variant_line;
-				unless($this_line_arr[$sample_index] =~ /\.\:\./) { # ZERO COVERAGE
-					for(my $vcf_i = 0; $vcf_i <= $FORMAT_index; $vcf_i++) {
-						$this_new_variant_line .= "$this_line_arr[$vcf_i]\t";
-					}
-					
-					$this_new_variant_line .= "$this_line_arr[$sample_index]";
-					
-					print THIS_NEW_VCF "$this_new_variant_line\n";
+
+				# This will include records with 0 coverage; eliminate later
+				for(my $vcf_i = 0; $vcf_i <= $FORMAT_index; $vcf_i++) {
+					$this_new_variant_line .= "$this_line_arr[$vcf_i]\t";
 				}
+				
+				$this_new_variant_line .= "$this_line_arr[$sample_index]";
+				
+				print THIS_NEW_VCF "$this_new_variant_line\n";
 			}
 		}
 		close ORIGINAL_SNP_REPORT;
@@ -809,7 +770,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 	} elsif(! $geneious_mode && ! $clc_mode && $vcf_mode) {
 		print "VCF format detected\n";
 	} else {
-		die "\n## WARNING: Conflicting SNP Report formats detected. Please contact author. ".
+		die "\n## WARNING: Conflicting SNP Report formats detected. Does the file extension match expectation? If not, please contact author. ".
 			"## SNPGenie TERMINATED.\n\n";
 	}
 	
@@ -823,12 +784,12 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 	##SAMVCF: changed to simple Boolean
 	# POPULATE the temporary file based on FORMAT MODE
 	if($clc_mode) {
-		&populate_tempfile_clc($curr_snp_report_name,$temp_snp_report_name);
+		&populate_tempfile_clc($curr_snp_report_name, $temp_snp_report_name);
 		$curr_snp_report_name = $temp_snp_report_name;
 	} elsif($geneious_mode) {
 		# (1) snpgenie_prep_geneious;
 		# (2) snpgnie_geneious_to_clc;
-		&populate_tempfile_geneious($curr_snp_report_name,$temp_snp_report_name);
+		&populate_tempfile_geneious($curr_snp_report_name, $temp_snp_report_name);
 		$curr_snp_report_name = $temp_snp_report_name;
 	} elsif($vcf_mode) {
 		if(! $vcfformat) {
@@ -836,7 +797,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				"## SNPGenie TERMINATED.\n\n";
 		}
 		
-		&populate_tempfile_vcf($curr_snp_report_name,$temp_snp_report_name,$cds_file);
+		&populate_tempfile_vcf($curr_snp_report_name, $temp_snp_report_name, $cds_file);
 		$curr_snp_report_name = $temp_snp_report_name;
 	}
 	
@@ -3801,7 +3762,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 	# We are REPLACING the coverage currently stored with this.
 	# FIRST, extract the positions that have already been stored, i.e., were present
 	# in the SNP report
-	my @stored_positions_sorted = sort {$a <=> $b} (keys %hh_nc_position_info); # only the polymorphic
+	my @stored_positions_sorted = sort {$a <=> $b} (keys %hh_nc_position_info); # only the polymorphic, or diff from reference
 	#print "\n\nSo far, we have stored: @stored_positions_sorted\n";
 	foreach my $curr_spot (@stored_positions_sorted) {
 		my $cov_sum = 0;
@@ -4157,17 +4118,18 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 		#print "New A: $A\nNew C: $C\nNew G: $G\nNew T: $T\n".
 		#	"New A prop: $A_prop\nNew C prop: $C_prop\nNew G prop: $G_prop\nNew T prop: $T_prop\n";
 		
+		#CURRENTISSUE
 		# DELETE the hash element if there are no longer any variants here.
-		if(($A + $C + $G == 0) || ($A + $C + $T == 0) || ($A + $G + $T == 0) ||
-			($C + $G + $T == 0)) {
-			delete($hh_nc_position_info{$curr_spot});
-		}
+#		if(($A + $C + $G == 0) || ($A + $C + $T == 0) || ($A + $G + $T == 0) ||
+#			($C + $G + $T == 0)) {
+#			delete($hh_nc_position_info{$curr_spot});
+#		}
 		
 		#print "New nt sum: $nt_sum\nNew cov: $updated_cov\nNew prop sum: $nt_prop_sum\n\n";
 		
 		# Round for comparisons
-		my $rounded_nt_sum = sprintf("%.3f",$nt_sum);
-		my $rounded_updated_cov = sprintf("%.3f",$updated_cov);
+		my $rounded_nt_sum = sprintf("%.3f", $nt_sum);
+		my $rounded_updated_cov = sprintf("%.3f", $updated_cov);
 		
 		# ERRORS
 		#if($rounded_nt_sum != $rounded_updated_cov) {
@@ -4265,7 +4227,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 	print "COMPLETED.\n";
 	
 	#comeback
-	print "\nProcessing all individual sites (nucleotides take time)... ";
+	print "\nProcessing all individual sites (nucleotides take time and memory; use a high-memory machine for eukaryotic chromosomes!)... ";
 	#print "\nSeq. length is: ".length($seq)."\n";
 	for (my $i = 0; $i < length($seq); $i++) { # FOR EACH SITE IN FASTA
 		my $position = $i+1;
@@ -4277,7 +4239,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 		if($hh_nc_position_info{$position}->{polymorphic} == 1) { # poly
 			# We have already DELETED records that contained no real variants, e.g.,
 			# all variant had frequencies 0% or were below the MAF
-			#print "\nSite $position is polymorphic\n"; # DOUBLE-CHECK: PASS
+			#print "\nSite $position is polymorphic or differs from reference\n"; # DOUBLE-CHECK: PASS
 			
 			my $A = $hh_nc_position_info{$position}->{A};
 			my $C = $hh_nc_position_info{$position}->{C};
@@ -4358,7 +4320,13 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 			
 			my $num_pw_diffs = ($A*$C + $A*$G + $A*$T + $C*$G + $C*$T + $G*$T);
 			my $total_pw_comps = (($cov * $cov) - $cov)/2;
-			my $mean_pw_diffs = ($num_pw_diffs / $total_pw_comps); # this IS pi, div by 1
+			
+			my $mean_pw_diffs = 0;
+			
+			if($total_pw_comps > 0) {
+				$mean_pw_diffs = ($num_pw_diffs / $total_pw_comps); # this IS pi, div by 1
+			}
+			
 			$hh_nc_position_info{$position}->{pi} = $mean_pw_diffs;
 			$sum_mean_pw_diffs += $mean_pw_diffs;
 			
@@ -4459,7 +4427,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				$num_nc_sites ++;
 				#print "NC\n";
 			}	
-		}
+		} # end non-poly site matching reference
 	}
 
 	# Calculate total pi values
@@ -4566,6 +4534,8 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 		# CALCULATE AVERAGE COVERAGE at each of the sites in this product.
 		# We are REPLACING the coverage currently stored with this.
 		my @stored_positions_sorted = sort {$a <=> $b} (keys %{$hh_product_position_info{$curr_product}});
+		#print "stored_positions_sorted: @stored_positions_sorted\n";
+		
 		foreach my $curr_spot (@stored_positions_sorted) {
 			#print "\ncurr_product is: $curr_product; curr_spot is: $curr_spot\n";
 			if (!($curr_spot =~ 'start') && !($curr_spot =~ 'stop') && 
@@ -4699,6 +4669,8 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				my $C_prop = $hh_product_position_info{$curr_product}->{$curr_spot}->{C_prop};
 				my $G_prop = $hh_product_position_info{$curr_product}->{$curr_spot}->{G_prop};
 				my $T_prop = $hh_product_position_info{$curr_product}->{$curr_spot}->{T_prop};
+				
+				#print "A=$A A_prop=$A_prop C=$C C_prop=$C_prop G=$G G_prop=$G_prop T=$T T_prop=$T_prop\n";
 				
 				if($A_prop < 0) {
 					$hh_product_position_info{$curr_product}->{$curr_spot}->{A_prop} = 0;
@@ -4955,11 +4927,13 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				#print "New A: $A\nNew C: $C\nNew G: $G\nNew T: $T\n".
 				#	"New A prop: $A_prop\nNew C prop: $C_prop\nNew G prop: $G_prop\nNew T prop: $T_prop\n";
 				
+				#CURRENTISSUE
+				# REMOVED THIS BECAUSE SOME VARIANTS ARE 100% DIFF FROM REFERENCE
 				# DELETE the hash element if there are no longer any variants here.
-				if(($A + $C + $G == 0) || ($A + $C + $T == 0) || ($A + $G + $T == 0) ||
-					($C + $G + $T == 0)) {
-					delete($hh_product_position_info{$curr_product}->{$curr_spot});
-				}
+				#if(($A + $C + $G == 0) || ($A + $C + $T == 0) || ($A + $G + $T == 0) ||
+				#	($C + $G + $T == 0)) {
+				#	delete($hh_product_position_info{$curr_product}->{$curr_spot});
+				#}
 				
 				#print "New nt sum: $nt_sum\nNew cov: $updated_cov\nNew prop sum: $nt_prop_sum\n\n";
 				
@@ -5359,10 +5333,12 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 			## END GENE DIVERSITY stuff
 			####
 			
+			#print "DOUBLE CHECK1: product=$curr_product site_pos_1=$site_pos_1\n";
+			
 			########################
 			### CODON POSITION 1 ###
 			########################
-			if (exists $hh_product_position_info{$curr_product}->{$site_pos_1}) { # If there was a variant(s) stored at position 1			
+			if (exists $hh_product_position_info{$curr_product}->{$site_pos_1}) { # If there was a variant(s) stored at position 1		
 				# call &get_amino_acid(CODON)
 				# call &get_number_of_site(CODON,POSITION) to return @arr=(#N,#S)
 				
@@ -5399,6 +5375,8 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				$prop_1_C = $hh_product_position_info{$curr_product}->{$site_pos_1}->{C_prop};
 				$prop_1_G = $hh_product_position_info{$curr_product}->{$site_pos_1}->{G_prop};
 				$prop_1_T = $hh_product_position_info{$curr_product}->{$site_pos_1}->{T_prop};
+				
+				#print "DOUBLE CHECK: product=$curr_product pos=$site_pos_1 num_1_A=$num_1_A site_cov=$site_cov prop_1_A=$prop_1_A\n";
 				
 #				my $A_prop = ($num_1_A / $site_cov);
 #				my $C_prop = ($num_1_C / $site_cov);
@@ -5532,8 +5510,10 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 					$N_diffs += $GT;
 				}
 				
-				$N_diffs_per_comparison += ($N_diffs / $num_pairwise_comparisons);
-				$S_diffs_per_comparison += ($S_diffs / $num_pairwise_comparisons);
+				if($num_pairwise_comparisons > 0) {
+					$N_diffs_per_comparison += ($N_diffs / $num_pairwise_comparisons);
+					$S_diffs_per_comparison += ($S_diffs / $num_pairwise_comparisons);
+				}
 				
 				####
 				## AVERAGE dN and dS versus REFERENCE stuff
@@ -5896,8 +5876,10 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 					$N_diffs += $GT;
 				}
 				
-				$N_diffs_per_comparison += ($N_diffs / $num_pairwise_comparisons);
-				$S_diffs_per_comparison += ($S_diffs / $num_pairwise_comparisons);
+				if($num_pairwise_comparisons > 0) {
+					$N_diffs_per_comparison += ($N_diffs / $num_pairwise_comparisons);
+					$S_diffs_per_comparison += ($S_diffs / $num_pairwise_comparisons);
+				}
 				
 				## AVERAGE dN and dS versus REFERENCE stuff
 				my $ref_nt = $hh_product_position_info{$curr_product}->{$site_pos_2}->{reference};
@@ -6260,8 +6242,10 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 					$N_diffs += $GT;
 				}
 				
-				$N_diffs_per_comparison += ($N_diffs / $num_pairwise_comparisons);
-				$S_diffs_per_comparison += ($S_diffs / $num_pairwise_comparisons);
+				if($num_pairwise_comparisons > 0) {
+					$N_diffs_per_comparison += ($N_diffs / $num_pairwise_comparisons);
+					$S_diffs_per_comparison += ($S_diffs / $num_pairwise_comparisons);
+				}
 				
 				## AVERAGE dN and dS versus REFERENCE stuff
 				my $ref_nt = $hh_product_position_info{$curr_product}->{$site_pos_3}->{reference};
@@ -6778,6 +6762,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 			my $codon_test_avg_cov = 0;
 			my $this_codon_mean_N_diffs_vs_ref = 0;
 			my $this_codon_mean_S_diffs_vs_ref = 0;
+			
 			if($codon_cov_denom_sum > 0) { # Then we've seen at least one variant
 				my $this_codon_avg_cov = ($codon_cov_sum / $codon_cov_denom_sum);
 				my $this_codon_avg_N_sites = ($this_codon_avg_cov * $codon_based_N_sites);
@@ -6852,79 +6837,19 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 			
 			my $codon_overlap_nts = ($site1_overlap+$site2_overlap+$site3_overlap);
 			
-			#if($sitebasedmode == 1) {
-			#	$ntd_headers_to_print .= "πN/πS\t";
-			#}
-			
-			if($sepfiles == 1) { # PRINT TO INDIVIDUAL NUCLEOTIDE DIVERSITY FILE
-				open(OUTFILE_NT_DIV_IND,">>$new_file_prefix\_results\.txt");
-				# PRINT HEADERS TO INDIVIDUAL NUCLEOTIDE DIVERSITY FILE, IF IT'S THE FIRST CDS
-				if ($product_counter == 0) { 
-					my $ntd_headers_to_print_ind = "file\tproduct\tsite\tcodon\tnum_overlap_ORF_nts\t".
-						"mean_nonsyn_diffs\tmean_syn_diffs\t";
-					if($sitebasedmode == 1) {
-						$ntd_headers_to_print_ind .= "mean_nonsyn_diffs_site_based\tmean_syn_diffs_site_based\t";
-					}
-					$ntd_headers_to_print_ind .= "nonsyn_sites\tsyn_sites\t";
-					if($sitebasedmode == 1) {
-						$ntd_headers_to_print_ind .= "nonsyn_sites_site_based\tsyn_sites_site_based\t";
-					}
-					$ntd_headers_to_print_ind .= "nonsyn_sites_ref\tsyn_sites_ref\t";
-					#$ntd_headers_to_print_ind .= "piN\tpiS\t";
-					if($ratiomode == 1) {
-						$ntd_headers_to_print_ind .= "piN/piS\t";
-					}
-					#$ntd_headers_to_print_ind .= "mean_dN_vs_ref\tmean_dS_vs_ref\n"; # \tAverage_cov
-					$ntd_headers_to_print_ind .= "mean_nonsyn_diffs_vs_ref\tmean_syn_diffs_vs_ref\t".
-						"mean_gdiv\tmean_nonsyn_gdiv\tmean_syn_gdiv\n";
-				
-					$product_counter += 1; # Increment so header is only printed once
-					
-					print OUTFILE_NT_DIV_IND "$ntd_headers_to_print_ind";
-				}
-				
-				# PRINT DATA LINE TO INDIVIDUAL NUCLEOTIDE DIVERSITY FILE
-				my $ntd_line_to_print_ind = "$file_nm\t$curr_product\t$curr_site\t".
-					"$curr_codon\t$codon_overlap_nts\t$new_avg_N_diffs\t$new_avg_S_diffs\t";
-				if($sitebasedmode == 1) {
-					$ntd_line_to_print_ind .= "$N_diffs_per_comparison\t$S_diffs_per_comparison\t";
-				}	
-				$ntd_line_to_print_ind .= "$codon_based_N_sites\t$codon_based_S_sites\t";
-				if($sitebasedmode == 1) {
-					$ntd_line_to_print_ind .= "$N_sites\t$S_sites\t";
-				}
-				$ntd_line_to_print_ind .= "$ref_based_N_sites\t$ref_based_S_sites\t";
-				#$ntd_line_to_print_ind .= "$pi_N\t$pi_S\t";
-				if($ratiomode == 1) {
-					$ntd_line_to_print_ind .= "$pi_N_over_S\t"; # SITE-BASED
-				}
-				#$ntd_line_to_print_ind .= "$avg_dN_vs_ref\t$avg_dS_vs_ref\n"; # \t$codon_test_avg_cov
-				#$ntd_line_to_print_ind .= "$this_codon_num_N_diffs\t".
-				#	"$this_codon_num_S_diffs\n";
-				$ntd_line_to_print_ind .= "$this_codon_mean_N_diffs_vs_ref\t".
-					"$this_codon_mean_S_diffs_vs_ref\t";
-				
-				print OUTFILE_NT_DIV_IND "$ntd_line_to_print_ind";
-				close OUTFILE_NT_DIV_IND;
-			}
 			
 			# PRINT DATA LINE TO COMPILED NUCLEOTIDE DIVERSITY FILE
 			open(OUTFILE_NT_DIV,">>codon\_results\.txt");
 			
 			my $ntd_line_to_print = "$file_nm\t$curr_product\t$curr_site\t".
-				"$curr_codon\t$codon_overlap_nts\t$new_avg_N_diffs\t$new_avg_S_diffs\t";
-			if($sitebasedmode == 1) {
-				$ntd_line_to_print .= "$N_diffs_per_comparison\t$S_diffs_per_comparison\t";
-			}
+				"$curr_codon\t$codon_overlap_nts\t". 
+				#"$codon_test_avg_cov\t".
+				"$new_avg_N_diffs\t$new_avg_S_diffs\t";
+				
 			$ntd_line_to_print .= "$codon_based_N_sites\t$codon_based_S_sites\t";
-			if($sitebasedmode == 1) {
-				$ntd_line_to_print .= "$N_sites\t$S_sites\t";
-			}
+
 			$ntd_line_to_print .= "$ref_based_N_sites\t$ref_based_S_sites\t";
 			#$ntd_line_to_print .= "$pi_N\t$pi_S\t";
-			if($ratiomode == 1) {
-				$ntd_line_to_print .= "$pi_N_over_S\t"; # SITE-BASED
-			}
 			#$ntd_line_to_print .= "$avg_dN_vs_ref\t$avg_dS_vs_ref\n"; # \t$codon_test_avg_cov
 			#$ntd_line_to_print .= "$this_codon_num_N_diffs\t$this_codon_num_S_diffs\n";
 			$ntd_line_to_print .= "$this_codon_mean_N_diffs_vs_ref\t".
@@ -7082,7 +7007,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				} elsif ($site1_siteb_category eq 'NA') {
 					$siteb_category = 'NA';
 				} else {
-					$siteb_category = 'ERROR';
+					$siteb_category = 'NONREF_NONPOLY';
 				}
 				
 				my $codonb_category;
@@ -7095,7 +7020,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				} elsif ($site1_codonb_category eq 'NA') {
 					$codonb_category = 'NA';
 				} else {
-					$codonb_category = 'ERROR';
+					$codonb_category = 'NONREF_NONPOLY';
 				}
 		
 				my $pi;
@@ -7143,7 +7068,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				} elsif ($site2_siteb_category eq 'NA') {
 					$siteb_category = 'NA';
 				} else {
-					$siteb_category = 'ERROR';
+					$siteb_category = 'NONREF_NONPOLY';
 				}
 				
 				my $codonb_category;
@@ -7156,7 +7081,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				} elsif ($site2_codonb_category eq 'NA') {
 					$codonb_category = 'NA';
 				} else {
-					$codonb_category = 'ERROR';
+					$codonb_category = 'NONREF_NONPOLY';
 				}
 			
 				my $pi;
@@ -7204,7 +7129,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				} elsif ($site3_siteb_category eq 'NA') {
 					$siteb_category = 'NA';
 				} else {
-					$siteb_category = 'ERROR';
+					$siteb_category = 'NONREF_NONPOLY';
 				}
 				
 				my $codonb_category;
@@ -7217,7 +7142,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 				} elsif ($site3_codonb_category eq 'NA') {
 					$codonb_category = 'NA';
 				} else {
-					$codonb_category = 'ERROR';
+					$codonb_category = 'NONREF_NONPOLY';
 				}
 					
 				my $pi;
@@ -7364,14 +7289,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 			}
 			
 			# PRINT AVERAGE GENE DIVERSITY VALUES for this codon to the nucleotide 
-			# diversity file(s)
-			if($sepfiles == 1) { # PRINT TO INDIVIDUAL NUCLEOTIDE DIVERSITY FILE
-				open(OUTFILE_NT_DIV_IND,">>$new_file_prefix\_results\.txt");
-				print OUTFILE_NT_DIV_IND "$this_codon_avg_gene_diversity\t".
-					"$this_codon_avg_gene_diversity_N\t$this_codon_avg_gene_diversity_S\n";
-				close OUTFILE_NT_DIV_IND;
-			}
-			
+			# diversity file
 			open(OUTFILE_NT_DIV,">>codon\_results\.txt");
 			print OUTFILE_NT_DIV "$this_codon_avg_gene_diversity\t".
 					"$this_codon_avg_gene_diversity_N\t$this_codon_avg_gene_diversity_S\n";
@@ -7819,7 +7737,7 @@ foreach my $curr_snp_report_name (@snp_report_file_names_arr) {
 } # Finished with SNP Report
 
 # Perform a SLIDING WINDOW if asked
-if($slidingwindow) {
+if($slidingwindow > 0) {
 	print "\n\nPerforming sliding window for all files, length $slidingwindow codons...\n\n";
 	&sliding_window($slidingwindow);
 }
@@ -8523,7 +8441,7 @@ sub get_product_names_from_gtf {
 	my %products_hash;
 	open (CURRINFILE, $cds_file);
 	while (<CURRINFILE>) {
-		if($_ =~ /CDS\t\d+\t\d+\t[\.\d+]\t\+/) { # Must be on the + strand
+		if($_ =~ /CDS\t\d+\t\d+\t[\.\d]+\t\+/) { # Must be on the + strand
 			#print "this_line: $_";
 			if($_ =~/\s*gene_id\s*\"gene\:([\w\s\.\-\:']+)\"/) { # transcript_id not a problem
 				$products_hash{$1} = 1;
@@ -8621,7 +8539,7 @@ sub determine_complement_mode {
 			$_ =~ s/\n//;
 		}
 		
-		if($_ =~ /CDS\t\d+\t\d+\t[\.\d+]\t-/) {
+		if($_ =~ /CDS\t\d+\t\d+\t[\.\d]+\t-/) {
 			$complement_mode = 1;
 			last;
 		}
@@ -9726,96 +9644,96 @@ sub populate_tempfile_vcf {
 		chdir('SNPGenie_Results');
 		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-			"Does not contain the column header \"CHROM\". SNPGenie terminated.\n";
+			"Does not contain the standard VCF column header \"CHROM\". SNPGenie terminated.\n";
 		close ERROR_FILE;
 		chdir('..');
 		
-		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"CHROM\". SNPGenie terminated.\n\n";	
+		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"CHROM\". SNPGenie terminated.\n\n";	
 	} elsif ($seen_index_pos == 0) {
 		chdir('SNPGenie_Results');
 		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-			"Does not contain the column header \"POS\". SNPGenie terminated.\n";
+			"Does not contain the standard VCF column header \"POS\". SNPGenie terminated.\n";
 		close ERROR_FILE;
 		chdir('..');
 		
-		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"POS\". SNPGenie terminated.\n\n";	
+		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"POS\". SNPGenie terminated.\n\n";	
 	} elsif ($seen_index_id == 0) {
 		chdir('SNPGenie_Results');
 		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-			"Does not contain the column header \"ID\". SNPGenie terminated.\n";
+			"Does not contain the standard VCF column header \"ID\". SNPGenie terminated.\n";
 		close ERROR_FILE;
 		chdir('..');
 		
-		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"ID\". SNPGenie terminated.\n\n";	
+		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"ID\". SNPGenie terminated.\n\n";	
 	} elsif ($seen_index_ref == 0) {
 		chdir('SNPGenie_Results');
 		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-			"Does not contain the column header \"REF\". SNPGenie terminated.\n";
+			"Does not contain the standard VCF column header \"REF\". SNPGenie terminated.\n";
 		close ERROR_FILE;
 		chdir('..');
 		
-		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"REF\". SNPGenie terminated.\n\n";	
+		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"REF\". SNPGenie terminated.\n\n";	
 	} elsif ($seen_index_alt == 0) {
 		chdir('SNPGenie_Results');
 		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-			"Does not contain the column header \"ALT\". SNPGenie terminated.\n";
+			"Does not contain the standard VCF column header \"ALT\". SNPGenie terminated.\n";
 		close ERROR_FILE;
 		chdir('..');
 		
-		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"ALT\". SNPGenie terminated.\n\n";	
+		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"ALT\". SNPGenie terminated.\n\n";	
 	} elsif ($seen_index_qual == 0) {
 		chdir('SNPGenie_Results');
 		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-			"Does not contain the column header \"QUAL\". SNPGenie terminated.\n";
+			"Does not contain the standard VCF column header \"QUAL\". SNPGenie terminated.\n";
 		close ERROR_FILE;
 		chdir('..');
 		
 		#unlink $curr_snp_report_name;
 		
-		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"QUAL\". SNPGenie terminated.\n\n";	
+		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"QUAL\". SNPGenie terminated.\n\n";	
 	} elsif ($seen_index_filter == 0) {
 		chdir('SNPGenie_Results');
 		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-			"Does not contain the column header \"FILTER\". SNPGenie terminated.\n";
+			"Does not contain the standard VCF column header \"FILTER\". SNPGenie terminated.\n";
 		close ERROR_FILE;
 		chdir('..');
 		
-		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"FILTER\". SNPGenie terminated.\n\n";	
+		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"FILTER\". SNPGenie terminated.\n\n";	
 	} elsif ($seen_index_info == 0) {
 		chdir('SNPGenie_Results');
 		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-			"Does not contain the column header \"INFO\". SNPGenie terminated.\n";
+			"Does not contain the standard VCF column header \"INFO\". SNPGenie terminated.\n";
 		close ERROR_FILE;
 		chdir('..');
 		
-		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"INFO\". SNPGenie terminated.\n\n";	
+		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"INFO\". SNPGenie terminated.\n\n";	
 	} #elsif ($seen_index_format == 0) {
 #		chdir('SNPGenie_Results');
 #		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 #		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-#			"Does not contain the column header \"FORMAT\". SNPGenie terminated.\n";
+#			"Does not contain the standard VCF column header \"FORMAT\". SNPGenie terminated.\n";
 #		close ERROR_FILE;
 #		chdir('..');
 #		
-#		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"FORMAT\". SNPGenie terminated.\n\n";	
+#		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"FORMAT\". SNPGenie terminated.\n\n";	
 #	} #elsif ($seen_index_sample1 == 0) {
 #		chdir('SNPGenie_Results');
 #		open(ERROR_FILE,">>SNPGenie\_WARNINGS\.txt");
 #		print ERROR_FILE "$curr_snp_report_name\tNA\tNA\t".
-#			"Does not contain the column header \"sample1\". SNPGenie terminated.\n";
+#			"Does not contain the standard VCF column header \"sample1\". SNPGenie terminated.\n";
 #		close ERROR_FILE;
 #		chdir('..');
 #		
 #		#unlink $curr_snp_report_name;
 #		
-#		die "\n\n## WARNING: $curr_snp_report_name does not contain the column header \"sample1\". SNPGenie terminated.\n\n";	
+#		die "\n\n## WARNING: $curr_snp_report_name does not contain the standard VCF column header \"sample1\". SNPGenie terminated.\n\n";	
 #	}
 	
 	# NEED TO BUILD A HASH WITH keys as ALL PRODUCT POSITIONS IN THE GENOME, and values being an array
@@ -9844,7 +9762,7 @@ sub populate_tempfile_vcf {
 			$_ =~ s/\n//;
 		}
 		
-		if($_ =~ /CDS\t\d+\t\d+\t[\.\d+]\t\+/) { # Make sure it's on the + strand
+		if($_ =~ /CDS\t\d+\t\d+\t[\.\d]+\t\+/) { # Make sure it's on the + strand
 			my $product;
 			if($_ =~ /\s*gene_id\s*\"gene\:([\w\s\.\-\:']+)\"/) {
 				$product = $1;
@@ -10035,19 +9953,22 @@ sub populate_tempfile_vcf {
 					##SAMVCF VCF FORMAT #1
 					if($vcfformat == 1) {
 					#if($info_value =~ /NS=(\d+)/) { # We've got a VCF SUMMARIZING INDIVIDUALS
-						if($warn_file_type_not_supported == 0) {
-							print "\n### WARNING: VCF FORMAT TYPE 1 IS NOT FULLY SUPPORTED ###\n";
-							$warn_file_type_not_supported ++;
-						}
+#						if($warn_file_type_not_supported == 0) {
+#							print "\n### WARNING: VCF FORMAT TYPE 1 IS NOT FULLY SUPPORTED ###\n";
+#							$warn_file_type_not_supported ++;
+#						}
 						
 						my $num_samples;
-						if($info_value =~ /NS=(\d+)/) {
+						if($info_value =~ /AN=(\d+)/) {
+							$num_samples = $1;
+						} elsif($info_value =~ /NS=(\d+)/) {
 							$num_samples = $1;
 						}
 						
 						my $variant_freq1;
 						my $variant_freq2;
 						my $variant_freq3;
+						
 						if($info_value =~ /AF=([\d\.e\-]+),([\d\.e\-]+),([\d\.e\-]+)/) {
 							$variant_freq1 = $1;
 							$variant_freq2 = $2;
@@ -10252,9 +10173,15 @@ sub populate_tempfile_vcf {
 						my $variant_count2 = ($alt_count / 3);
 						my $variant_count3 = ($alt_count / 3);
 						
-						my $variant_freq1 = ($variant_count1 / $coverage);
-						my $variant_freq2 = ($variant_count2 / $coverage);
-						my $variant_freq3 = ($variant_count3 / $coverage);
+						my $variant_freq1;
+						my $variant_freq2;
+						my $variant_freq3;
+						
+						if($coverage > 0) {
+							$variant_freq1 = ($variant_count1 / $coverage);
+							$variant_freq2 = ($variant_count2 / $coverage);
+							$variant_freq3 = ($variant_count3 / $coverage);
+						}
 						
 						my $variant_pct1 = (100 * $variant_freq1);
 						my $variant_pct2 = (100 * $variant_freq2);
@@ -10397,10 +10324,16 @@ sub populate_tempfile_vcf {
 							close ERROR_FILE;
 							chdir('..');
 						} # it seems common that DP > coverage, because some reads get filtered
-								
-						my $variant_freq1 = ($variant_count1 / $coverage);
-						my $variant_freq2 = ($variant_count2 / $coverage);
-						my $variant_freq3 = ($variant_count3 / $coverage);
+						
+						my $variant_freq1;
+						my $variant_freq2;
+						my $variant_freq3;
+						
+						if($coverage > 0) {
+							 $variant_freq1 = ($variant_count1 / $coverage);
+							 $variant_freq2 = ($variant_count2 / $coverage);
+							 $variant_freq3 = ($variant_count3 / $coverage);
+						}
 						
 						my $variant_pct1 = (100 * $variant_freq1);
 						my $variant_pct2 = (100 * $variant_freq2);
@@ -10463,13 +10396,15 @@ sub populate_tempfile_vcf {
 					##SAMVCF VCF FORMAT #1
 					if($vcfformat == 1) {
 					#if($info_value =~ /NS=(\d+)/) { # We've got a VCF summarizing INDIVIDUALS
-						if($warn_file_type_not_supported == 0) {
-							print "\n### WARNING: SNP REPORT FILE TYPE NOT FULLY SUPPORTED ###\n";
-							$warn_file_type_not_supported ++;
-						}
+#						if($warn_file_type_not_supported == 0) {
+#							print "\n### WARNING: SNP REPORT FILE TYPE NOT FULLY SUPPORTED ###\n";
+#							$warn_file_type_not_supported ++;
+#						}
 						
 						my $num_samples;
-						if($info_value =~ /NS=(\d+)/) {
+						if($info_value =~ /AN=(\d+)/) {
+							$num_samples = $1;
+						} elsif($info_value =~ /NS=(\d+)/) {
 							$num_samples = $1;
 						}
 						
@@ -10629,8 +10564,13 @@ sub populate_tempfile_vcf {
 						my $variant_count1 = ($alt_count / 2);
 						my $variant_count2 = ($alt_count / 2);
 						
-						my $variant_freq1 = ($variant_count1 / $coverage);
-						my $variant_freq2 = ($variant_count2 / $coverage);
+						my $variant_freq1;
+						my $variant_freq2;
+						
+						if($coverage > 0) {
+							$variant_freq1 = ($variant_count1 / $coverage);
+							$variant_freq2 = ($variant_count2 / $coverage);
+						}
 						
 						my $variant_pct1 = (100 * $variant_freq1);
 						my $variant_pct2 = (100 * $variant_freq2);
@@ -10762,8 +10702,13 @@ sub populate_tempfile_vcf {
 							chdir('..');
 						} # it seems common that DP > coverage, because some reads get filtered
 								
-						my $variant_freq1 = ($variant_count1 / $coverage);
-						my $variant_freq2 = ($variant_count2 / $coverage);
+						my $variant_freq1;
+						my $variant_freq2;
+						
+						if($coverage > 0) {
+							$variant_freq1 = ($variant_count1 / $coverage);
+							$variant_freq2 = ($variant_count2 / $coverage);
+						}
 						
 						my $variant_pct1 = (100 * $variant_freq1);
 						my $variant_pct2 = (100 * $variant_freq2);
@@ -10811,13 +10756,15 @@ sub populate_tempfile_vcf {
 					##SAMVCF VCF FORMAT #1
 					if($vcfformat == 1) {
 					#if($info_value =~ /NS=(\d+)/) { # We've got a VCF summarizing INDIVIDUALS
-						if($warn_file_type_not_supported == 0) {
-							print "\n### WARNING: SNP REPORT FILE TYPE NOT FULLY SUPPORTED ###\n";
-							$warn_file_type_not_supported ++;
-						}
+#						if($warn_file_type_not_supported == 0) {
+#							print "\n### WARNING: SNP REPORT FILE TYPE NOT FULLY SUPPORTED ###\n";
+#							$warn_file_type_not_supported ++;
+#						}
 						
 						my $num_samples;
-						if($info_value =~ /NS=(\d+)/) {
+						if($info_value =~ /AN=(\d+)/) {
+							$num_samples = $1;
+						} elsif($info_value =~ /NS=(\d+)/) {
 							$num_samples = $1;
 						}
 						
@@ -10932,7 +10879,11 @@ sub populate_tempfile_vcf {
 						
 						my $variant_count1 = $alt_count;
 						
-						my $variant_freq1 = ($variant_count1 / $coverage);
+						my $variant_freq1;
+						
+						if($coverage > 0) {
+							$variant_freq1 = ($variant_count1 / $coverage);
+						}
 						
 						my $variant_pct1 = (100 * $variant_freq1);
 						
@@ -11044,7 +10995,7 @@ sub populate_tempfile_vcf {
 						
 						####################
 						if ($coverage == 0) {
-							warn "\n### WARNING: coverage is 0 in $curr_snp_report_name site $ref_pos.\n\n";
+							warn "### WARNING: coverage is 0 in $curr_snp_report_name site $ref_pos.\n";
 						} else {
 							$variant_freq1 = ($variant_count1 / $coverage);
 						}
@@ -11198,7 +11149,7 @@ sub get_product_coordinates {
 	
 	open (CURRINFILE, $cds_file);
 	while (<CURRINFILE>) { # go through the GTF file
-		if($_ =~ /CDS\t\d+\t\d+\t[\.\d+]\t\+/) { # Must be on the + strand #COMEBACK to \d+]
+		if($_ =~ /CDS\t\d+\t\d+\t[\.\d]+\t\+/) { # Must be on the + strand #COMEBACK to \d+]
 			chomp;
 			# CHOMP for 3 operating systems
 			if($_ =~ /\r\n$/) {
